@@ -23,6 +23,14 @@ A community project focused on improving Apple TV controls, app launching, and H
 - Home Assistant cannot always automatically discover launchable applications
 - Some bundle IDs must be manually tested and verified
 
+- ## Discovery Method
+
+Bundle IDs verified using:
+- Home Assistant
+- pyatv
+- Apple TV Companion Protocol
+- Manual launch_app testing
+
 ## Goals
 
 - Build a verified Apple TV bundle ID database
@@ -30,3 +38,13 @@ A community project focused on improving Apple TV controls, app launching, and H
 - Create a HACS integration
 - Improve HomeKit compatibility
 - Simplify Apple TV app launching
+
+## Apps Needing Verification
+
+- Plex
+- ESPN
+- Tubi
+- Sling
+- The CW
+- RetroArch
+- Motivation
