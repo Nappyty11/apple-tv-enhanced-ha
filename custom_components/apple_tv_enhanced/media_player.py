@@ -53,18 +53,14 @@ class AppleTVEnhancedMediaPlayer(MediaPlayerEntity):
     def _get_sources(self):
         """Return built-in and custom sources."""
         sources = dict(APP_IDS)
-        custom_sources = self.entry.data.get("custom_sources", "")
 
-        for line in custom_sources.splitlines():
-            if "=" not in line:
-                continue
+        name = self.entry.data.get("custom_source_name", "").strip()
+        target = self.entry.data.get("custom_source_target", "").strip()
 
-            name, target = line.split("=", 1)
-            name = name.strip()
-            target = target.strip()
+        if name and target:
+            sources[name] = target
 
-            if name and target:
-                sources[name] = target
+        sources["Home Screen"] = "__HOME__"
 
         return sources
 
@@ -117,6 +113,20 @@ class AppleTVEnhancedMediaPlayer(MediaPlayerEntity):
 
         target = sources[source]
         self._attr_source = source
+
+        if target == "__HOME__":
+            await self.hass.services.async_call(
+                "remote",
+                "send_command",
+                {
+                    "device_id": self._device_id,
+                    "command": "home",
+                },
+                blocking=True,
+            )
+
+            self.async_write_ha_state()
+            return
 
         media_type = "app"
 
