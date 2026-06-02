@@ -1,7 +1,7 @@
 {
   "domain": "apple_tv_enhanced",
   "name": "Apple TV Enhanced",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "config_flow": true,
   "documentation": "https://github.com/Nappyty11/apple-tv-enhanced-ha",
   "issue_tracker": "https://github.com/Nappyty11/apple-tv-enhanced-ha/issues",
