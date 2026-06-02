@@ -12,4 +12,15 @@ APP_IDS = {
     "Twitch": "tv.twitch",
     "Crunchyroll": "com.crunchyroll.iphone",
     "Calendar by Dashbd": "com.benoitzohar.Calendar",
+    "Apple TV": "com.apple.TVWatchList",
+
+    "Apple Music": "com.apple.TVMusic",
+
+    "Apple Podcasts": "com.apple.Podcasts",
+
+    "Apple Photos": "com.apple.TVPhotos",
+
+    "Apple Settings": "com.apple.TVSettings",
+
+    "Apple App Store": "com.apple.TVAppStore",
 }
