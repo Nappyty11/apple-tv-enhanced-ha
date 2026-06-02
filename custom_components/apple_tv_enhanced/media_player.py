@@ -39,8 +39,9 @@ class AppleTVEnhancedMediaPlayer(MediaPlayerEntity):
             | MediaPlayerEntityFeature.PLAY
             | MediaPlayerEntityFeature.PAUSE
         )
-        self._attr_source_list = list(APP_IDS.keys())
         self._attr_source = None
+        self._attr_source_list = list(self._get_sources().keys())
+
         self._attr_device_info = {
             "identifiers": {(DOMAIN, entry.entry_id)},
             "name": "Apple TV Enhanced",
@@ -48,6 +49,24 @@ class AppleTVEnhancedMediaPlayer(MediaPlayerEntity):
             "model": "Enhanced Apple TV Controller",
             "sw_version": "0.0.1",
         }
+
+    def _get_sources(self):
+        """Return built-in and custom sources."""
+        sources = dict(APP_IDS)
+        custom_sources = self.entry.data.get("custom_sources", "")
+
+        for line in custom_sources.splitlines():
+            if "=" not in line:
+                continue
+
+            name, target = line.split("=", 1)
+            name = name.strip()
+            target = target.strip()
+
+            if name and target:
+                sources[name] = target
+
+        return sources
 
     @property
     def state(self):
@@ -90,19 +109,27 @@ class AppleTVEnhancedMediaPlayer(MediaPlayerEntity):
         self.async_write_ha_state()
 
     async def async_select_source(self, source: str) -> None:
-        """Launch selected app."""
-        if source not in APP_IDS:
+        """Launch selected app or deep link."""
+        sources = self._get_sources()
+
+        if source not in sources:
             return
 
+        target = sources[source]
         self._attr_source = source
+
+        media_type = "app"
+
+        if "://" in target:
+            media_type = "url"
 
         await self.hass.services.async_call(
             "media_player",
             "play_media",
             {
                 "entity_id": self._media_player_entity,
-                "media_content_id": APP_IDS[source],
-                "media_content_type": "app",
+                "media_content_id": target,
+                "media_content_type": media_type,
             },
             blocking=True,
         )
