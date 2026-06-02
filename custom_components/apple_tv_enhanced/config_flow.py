@@ -59,7 +59,9 @@ class AppleTVEnhancedConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     vol.Required("media_player_entity"): vol.In(
                         apple_tv_media_players
                     ),
-                    vol.Optional("custom_sources", default=""): str,
+                    vol.Optional("custom_source_name", default=""): str,
+                    vol.Optional("custom_source_target", default=""): str,
                 }
             ),
         )
+
