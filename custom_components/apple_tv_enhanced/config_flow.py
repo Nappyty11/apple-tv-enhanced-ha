@@ -16,12 +16,6 @@ class AppleTVEnhancedConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     async def async_step_user(self, user_input=None):
         """Handle setup."""
 
-        if user_input is not None:
-            return self.async_create_entry(
-                title="Apple TV Enhanced",
-                data=user_input,
-            )
-
         entity_registry = er.async_get(self.hass)
 
         apple_tv_media_players = []
@@ -29,7 +23,6 @@ class AppleTVEnhancedConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         for entity in entity_registry.entities.values():
             if not entity.entity_id.startswith("media_player."):
                 continue
-
             if entity.platform != "apple_tv":
                 continue
 
@@ -37,17 +30,9 @@ class AppleTVEnhancedConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             if state is None:
                 continue
 
-            friendly_name = state.attributes.get(
-                "friendly_name", ""
-            ).lower()
-
-            model_name = state.attributes.get(
-                "model_name", ""
-            ).lower()
-
-            device_class = state.attributes.get(
-                "device_class", ""
-            ).lower()
+            friendly_name = state.attributes.get("friendly_name", "").lower()
+            model_name = state.attributes.get("model_name", "").lower()
+            device_class = state.attributes.get("device_class", "").lower()
 
             if (
                 "apple tv" in friendly_name
@@ -56,13 +41,24 @@ class AppleTVEnhancedConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             ):
                 apple_tv_media_players.append(entity.entity_id)
 
+        if user_input is not None:
+            selected_entity = user_input["media_player_entity"]
+            registry_entry = entity_registry.async_get(selected_entity)
+
+            user_input["device_id"] = registry_entry.device_id
+
+            return self.async_create_entry(
+                title="Apple TV Enhanced",
+                data=user_input,
+            )
+
         return self.async_show_form(
             step_id="user",
             data_schema=vol.Schema(
                 {
-                    vol.Required(
-                        "media_player_entity"
-                    ): vol.In(apple_tv_media_players),
+                    vol.Required("media_player_entity"): vol.In(
+                        apple_tv_media_players
+                    ),
                 }
             ),
         )
