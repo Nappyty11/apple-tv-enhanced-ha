@@ -1,5 +1,7 @@
 """Media player platform for Apple TV Enhanced."""
 
+import asyncio
+
 from homeassistant.components.media_player import MediaPlayerEntity
 from homeassistant.components.media_player.const import (
     MediaPlayerEntityFeature,
@@ -30,10 +32,12 @@ class AppleTVEnhancedMediaPlayer(MediaPlayerEntity):
         self.hass = hass
         self.entry = entry
         self._media_player_entity = entry.data["media_player_entity"]
+        self._device_id = entry.data.get("device_id")
 
         self._attr_name = "Apple TV Enhanced"
         self._attr_unique_id = f"{entry.entry_id}_media_player"
         self._attr_device_class = "tv"
+
         self._attr_supported_features = (
             MediaPlayerEntityFeature.TURN_ON
             | MediaPlayerEntityFeature.TURN_OFF
@@ -41,6 +45,7 @@ class AppleTVEnhancedMediaPlayer(MediaPlayerEntity):
             | MediaPlayerEntityFeature.PLAY
             | MediaPlayerEntityFeature.PAUSE
         )
+
         self._attr_source_list = list(APP_IDS.keys())
         self._attr_source = None
 
@@ -76,23 +81,69 @@ class AppleTVEnhancedMediaPlayer(MediaPlayerEntity):
         return self._attr_source_list
 
     async def async_turn_on(self) -> None:
+
         """Turn Apple TV on."""
+
         await self.hass.services.async_call(
-            "media_player",
-            "turn_on",
-            {"entity_id": self._media_player_entity},
+
+            "remote",
+
+            "send_command",
+
+            {
+
+                "device_id": self._device_id,
+
+                "command": "wakeup",
+
+            },
+
             blocking=True,
+
         )
+
         self.async_write_ha_state()
 
     async def async_turn_off(self) -> None:
-        """Turn Apple TV off."""
+        """Turn Apple TV off using fast sleep."""
         await self.hass.services.async_call(
-            "media_player",
-            "turn_off",
-            {"entity_id": self._media_player_entity},
+            "remote",
+            "send_command",
+            {
+                "device_id": self._device_id,
+                "command": "suspend",
+            },
             blocking=True,
         )
+
+        await asyncio.sleep(5)
+
+        self.async_write_ha_state()
+
+        await asyncio.sleep(1)
+
+        await self.hass.services.async_call(
+            "remote",
+            "send_command",
+            {
+                "device_id": self._device_id,
+                "command": "down",
+            },
+            blocking=True,
+        )
+
+        await asyncio.sleep(1)
+
+        await self.hass.services.async_call(
+            "remote",
+            "send_command",
+            {
+                "device_id": self._device_id,
+                "command": "select",
+            },
+            blocking=True,
+        )
+
         self.async_write_ha_state()
 
     async def async_select_source(self, source: str) -> None:
